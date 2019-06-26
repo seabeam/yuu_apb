@@ -1,0 +1,74 @@
+/////////////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 seabeam@yahoo.com - Licensed under the Apache License, Version 2.0
+// For more information, see LICENCE in the main folder
+/////////////////////////////////////////////////////////////////////////////////////
+`ifndef YUU_APB_SLAVE_INTERFACE_SVI
+`define YUU_APB_SLAVE_INTERFACE_SVI
+
+interface yuu_apb_slave_interface();
+  // AMBA2 APB Specification
+  logic                             pclk;
+  logic                             preset_n;
+  logic [`YUU_APB_ADDR_WIDTH-1:0]   paddr;
+  logic                             penable;
+  logic                             pwrite;
+  logic [`YUU_APB_DATA_WIDTH-1:0]   pwdata;
+  logic [`YUU_APB_DATA_WIDTH-1:0]   prdata;
+  logic                             psel;
+  
+  // AMBA3 APB Protocol Specification v1.0
+  logic                             pready;
+  logic                             pslverr;
+
+  // AMBA APB Protocol Specification v2.0
+  logic [2:0]                       pprot;
+  logic [`YUU_APB_DATA_WIDTH/8-1:0] pstrb;
+
+  clocking cb @(posedge pclk);
+    default input #`YUU_APB_SLAVE_INPUT_TIME output #`YUU_APB_SLAVE_OUTPUT_TIME;
+
+    input  paddr;
+    input  penable;
+    input  pwrite;
+    input  pwdata;
+    input  psel;
+    input  pstrb;
+    input  pprot;
+
+    output prdata;
+    output pready;
+    output pslverr;
+  endclocking
+
+  clocking mon_cb @(posedge pclk);
+    default input #`YUU_APB_SLAVE_INPUT_TIME output #`YUU_APB_SLAVE_OUTPUT_TIME;
+
+    input  paddr;
+    input  penable;
+    input  pwrite;
+    input  pwdata;
+    input  psel;
+    input  pstrb;
+    input  pprot;
+
+    input  prdata;
+    input  pready;
+    input  pslverr;
+  endclocking
+
+  modport async (
+    input  paddr,
+    input  penable,
+    input  pwrite,
+    input  pwdata,
+    input  psel,
+    input  pstrb,
+    input  pprot,
+
+    output prdata,
+    output pready,
+    output pslverr
+  );
+endinterface
+
+`endif

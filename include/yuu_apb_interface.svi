@@ -1,0 +1,174 @@
+/////////////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 seabeam@yahoo.com - Licensed under the Apache License, Version 2.0
+// For more information, see LICENCE in the main folder
+/////////////////////////////////////////////////////////////////////////////////////
+`ifndef YUU_APB_INTERFACE_SVI
+`define YUU_APB_INTERFACE_SVI
+
+`include "yuu_apb_master_interface.svi"
+`include "yuu_apb_slave_interface.svi"
+
+interface yuu_apb_interface();
+  yuu_apb_master_interface master_if[64]();
+  yuu_apb_slave_interface slave_if[64]();
+
+  function void check_master_define(int idx);
+    if (idx>=`YUU_APB_MASTER_NUM) begin
+      $display("[FATAL] yuu_apb_interface: the master index %0d has not been defined, check the YUU_APB_MASTER_NUM define", idx);
+      $finish;
+    end
+  endfunction
+
+  function void check_slave_define(int idx);
+    if (idx>=`YUU_APB_SLAVE_NUM) begin
+      $display("[FATAL] yuu_apb_interface: the slave index %0d has not been defined, check the YUU_APB_SLAVE_NUM define", idx);
+      $finish;
+    end
+  endfunction
+
+  function virtual yuu_apb_master_interface get_master_if(int idx);
+    check_master_define(idx);
+    
+    // Max: 64
+    case(idx)
+      00: return master_if[00];
+      01: return master_if[01];
+      02: return master_if[02];
+      03: return master_if[03];
+      04: return master_if[04];
+      05: return master_if[05];
+      06: return master_if[06];
+      07: return master_if[07];
+      08: return master_if[08];
+      09: return master_if[09];
+      10: return master_if[10];
+      11: return master_if[11];
+      12: return master_if[12];
+      13: return master_if[13];
+      14: return master_if[14];
+      15: return master_if[15];
+      16: return master_if[16];
+      17: return master_if[17];
+      18: return master_if[18];
+      19: return master_if[19];
+      20: return master_if[20];
+      21: return master_if[21];
+      22: return master_if[22];
+      23: return master_if[23];
+      24: return master_if[24];
+      25: return master_if[25];
+      26: return master_if[26];
+      27: return master_if[27];
+      28: return master_if[28];
+      29: return master_if[29];
+      30: return master_if[30];
+      31: return master_if[31];
+      32: return master_if[32];
+      33: return master_if[33];
+      34: return master_if[34];
+      35: return master_if[35];
+      36: return master_if[36];
+      37: return master_if[37];
+      38: return master_if[38];
+      39: return master_if[39];
+      40: return master_if[40];
+      41: return master_if[41];
+      42: return master_if[42];
+      43: return master_if[43];
+      44: return master_if[44];
+      45: return master_if[45];
+      46: return master_if[46];
+      47: return master_if[47];
+      48: return master_if[48];
+      49: return master_if[49];
+      50: return master_if[50];
+      51: return master_if[51];
+      52: return master_if[52];
+      53: return master_if[53];
+      54: return master_if[54];
+      55: return master_if[55];
+      56: return master_if[56];
+      57: return master_if[57];
+      58: return master_if[58];
+      59: return master_if[59];
+      60: return master_if[60];
+      61: return master_if[61];
+      62: return master_if[62];
+      63: return master_if[63];
+    endcase
+  endfunction
+
+  function virtual yuu_apb_slave_interface get_slave_if(int idx);
+    check_slave_define(idx);
+    
+    // Max: 64
+    case(idx)
+      00: return slave_if[00];
+      01: return slave_if[01];
+      02: return slave_if[02];
+      03: return slave_if[03];
+      04: return slave_if[04];
+      05: return slave_if[05];
+      06: return slave_if[06];
+      07: return slave_if[07];
+      08: return slave_if[08];
+      09: return slave_if[09];
+      10: return slave_if[10];
+      11: return slave_if[11];
+      12: return slave_if[12];
+      13: return slave_if[13];
+      14: return slave_if[14];
+      15: return slave_if[15];
+      16: return slave_if[16];
+      17: return slave_if[17];
+      18: return slave_if[18];
+      19: return slave_if[19];
+      20: return slave_if[20];
+      21: return slave_if[21];
+      22: return slave_if[22];
+      23: return slave_if[23];
+      24: return slave_if[24];
+      25: return slave_if[25];
+      26: return slave_if[26];
+      27: return slave_if[27];
+      28: return slave_if[28];
+      29: return slave_if[29];
+      30: return slave_if[30];
+      31: return slave_if[31];
+      32: return slave_if[32];
+      33: return slave_if[33];
+      34: return slave_if[34];
+      35: return slave_if[35];
+      36: return slave_if[36];
+      37: return slave_if[37];
+      38: return slave_if[38];
+      39: return slave_if[39];
+      40: return slave_if[40];
+      41: return slave_if[41];
+      42: return slave_if[42];
+      43: return slave_if[43];
+      44: return slave_if[44];
+      45: return slave_if[45];
+      46: return slave_if[46];
+      47: return slave_if[47];
+      48: return slave_if[48];
+      49: return slave_if[49];
+      50: return slave_if[50];
+      51: return slave_if[51];
+      52: return slave_if[52];
+      53: return slave_if[53];
+      54: return slave_if[54];
+      55: return slave_if[55];
+      56: return slave_if[56];
+      57: return slave_if[57];
+      58: return slave_if[58];
+      59: return slave_if[59];
+      60: return slave_if[60];
+      61: return slave_if[61];
+      62: return slave_if[62];
+      63: return slave_if[63];
+    endcase
+  endfunction
+endinterface
+
+`endif
