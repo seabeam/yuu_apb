@@ -11,10 +11,10 @@ class yuu_apb_master_analyzer extends uvm_subscriber #(yuu_apb_master_item);
   yuu_apb_master_config cfg;
   uvm_event_pool events;
 
-  local time m_start_time;
-  local time m_end_time;
-  local bit  m_start = 0;
-  local int  m_count = 0;
+  protected time m_start_time;
+  protected time m_end_time;
+  protected bit  m_start = 0;
+  protected int  m_count = 0;
 
   `uvm_component_utils_begin(yuu_apb_master_analyzer)
   `uvm_component_utils_end
@@ -49,11 +49,15 @@ task yuu_apb_master_analyzer::main_phase(uvm_phase phase);
 endtask
 
 function void yuu_apb_master_analyzer::report_phase(uvm_phase phase);
+  real tput_rate;
+
   if (m_count == 0) begin
     `uvm_warning("report_phase", "Analyzer haven't received any transaction")
     return;
   end
-  `uvm_info("report_phase", $sformatf("Tput value is %d", (m_end_time-m_start_time)/m_count), UVM_LOW);
+  
+  tput_rate = real'(m_count)/(m_end_time - m_start_time) * 1000;
+  `uvm_info("report_phase", $sformatf("APB master speed is %f", tput_rate), UVM_LOW);
 endfunction
 
 function void yuu_apb_master_analyzer::write(yuu_apb_master_item t);

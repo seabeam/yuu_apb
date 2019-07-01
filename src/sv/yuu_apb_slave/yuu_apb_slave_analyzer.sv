@@ -49,11 +49,15 @@ task yuu_apb_slave_analyzer::main_phase(uvm_phase phase);
 endtask
 
 function void yuu_apb_slave_analyzer::report_phase(uvm_phase phase);
+  real tput_rate;
+
   if (m_count == 0) begin
     `uvm_warning("report_phase", "Analyzer haven't received any transaction")
     return;
   end
-  `uvm_info("report_phase", $sformatf("Tput value is %d", (m_end_time-m_start_time)/m_count), UVM_NONE);
+  
+  tput_rate = real'(m_count)/(m_end_time - m_start_time) * 1000;
+  `uvm_info("report_phase", $sformatf("APB slave speed is %f", tput_rate), UVM_LOW);
 endfunction
 
 function void yuu_apb_slave_analyzer::write(yuu_apb_slave_item t);
