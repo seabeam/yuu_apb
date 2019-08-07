@@ -4,6 +4,13 @@
 /////////////////////////////////////////////////////////////////////////////////////
 `ifndef YUU_APB_DEFINES_SVH
 `define YUU_APB_DEFINES_SVH
+  `ifndef YUU_APB_MASTER_NUM
+  `define YUU_APB_MASTER_NUM 1
+  `endif
+  
+  `ifndef YUU_APB_SLAVE_NUM
+  `define YUU_APB_SLAVE_NUM 1
+  `endif
   
   `ifndef YUU_APB_ADDR_WIDTH
   `define YUU_APB_ADDR_WIDTH 32
