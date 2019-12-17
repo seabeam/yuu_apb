@@ -5,11 +5,6 @@
 `ifndef YUU_APB_TYPE_SVH
 `define YUU_APB_TYPE_SVH
 
-  typedef class yuu_apb_master_item;
-  typedef class yuu_apb_slave_item;
-  typedef uvm_sequencer #(yuu_apb_master_item) yuu_apb_master_sequencer;
-  typedef uvm_sequencer #(yuu_apb_slave_item)  yuu_apb_slave_sequencer;
-
   typedef bit[`YUU_APB_DATA_WIDTH-1:0]   yuu_apb_data_t;
   typedef bit[`YUU_APB_ADDR_WIDTH-1:0]   yuu_apb_addr_t;
   typedef bit[`YUU_APB_DATA_WIDTH/8-1:0] yuu_apb_strb_t;

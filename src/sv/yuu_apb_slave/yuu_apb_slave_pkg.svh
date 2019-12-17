@@ -9,9 +9,9 @@
   `include "yuu_apb_slave_config.sv"
   `include "yuu_apb_slave_item.sv"
   `include "yuu_apb_slave_callbacks.sv"
-
   `include "yuu_apb_slave_base_sequence.sv"
   `include "yuu_apb_slave_response_sequence.sv"
+  `include "yuu_apb_slave_sequencer.sv"
   `include "yuu_apb_slave_driver.sv"
   `include "yuu_apb_slave_monitor.sv"
   `include "yuu_apb_slave_collector.sv"

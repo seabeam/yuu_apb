@@ -5,6 +5,7 @@
 `ifndef YUU_APB_SLAVE_CONFIG_SV
 `define YUU_APB_SLAVE_CONFIG_SV
 
+typedef class yuu_apb_slave_sequencer;
 class yuu_apb_slave_config extends yuu_apb_agent_config;
   virtual yuu_apb_slave_interface vif;
 
@@ -12,11 +13,9 @@ class yuu_apb_slave_config extends yuu_apb_agent_config;
   boolean wait_enable = True;
   boolean always_okay = True;
   boolean use_random_data = False;
+  yuu_apb_slave_sequencer sequencer_ptr;
 
   yuu_amba_addr_map maps[];
-
-  // Sequencer handle
-  yuu_apb_slave_sequencer sequencer_ptr;
 
   `uvm_object_utils_begin(yuu_apb_slave_config)
     `uvm_field_enum        (boolean, wait_enable,     UVM_PRINT | UVM_COPY)
