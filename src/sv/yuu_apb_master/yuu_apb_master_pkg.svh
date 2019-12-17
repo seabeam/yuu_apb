@@ -7,8 +7,8 @@
 
   `include "yuu_apb_master_config.sv"
   `include "yuu_apb_master_item.sv"
+  `include "yuu_apb_master_sequence_lib.sv"
   `include "yuu_apb_master_callbacks.sv"
-  `include "yuu_apb_master_base_sequence.sv"
   `include "yuu_apb_master_sequencer.sv"
   `include "yuu_apb_master_driver.sv"
   `include "yuu_apb_master_monitor.sv"

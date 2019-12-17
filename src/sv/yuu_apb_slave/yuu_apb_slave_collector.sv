@@ -10,7 +10,7 @@ class yuu_apb_slave_collector extends uvm_subscriber #(yuu_apb_slave_item);
 
   yuu_apb_slave_config cfg;
 
-  yuu_apb_master_item item;
+  yuu_apb_slave_item item;
 
   covergroup apb_transaction_cg();
     direction: coverpoint item.direction {
@@ -53,7 +53,7 @@ task yuu_apb_slave_collector::main_phase(uvm_phase phase);
 endtask
 
 function void yuu_apb_slave_collector::write(yuu_apb_slave_item t);
-  item = yuu_apb_master_item::type_id::create("item");
+  item = yuu_apb_slave_item::type_id::create("item");
   item.copy(t);
   apb_transaction_cg.sample();
 endfunction
