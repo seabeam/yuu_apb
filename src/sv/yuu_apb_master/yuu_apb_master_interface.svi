@@ -68,23 +68,25 @@ interface yuu_apb_master_interface();
     output  pstrb,
     output  pprot,
 
+    input   preset_n,
     input   prdata,
     input   pready,
     input   pslverr
   );
 
   modport mon_mp (
-    output  paddr,
-    output  penable,
-    output  pwrite,
-    output  pwdata,
-    output  psel,
-    output  pstrb,
-    output  pprot,
+    input  preset_n,
+    input  paddr,
+    input  penable,
+    input  pwrite,
+    input  pwdata,
+    input  psel,
+    input  pstrb,
+    input  pprot,
 
-    input   prdata,
-    input   pready,
-    input   pslverr
+    input  prdata,
+    input  pready,
+    input  pslverr
   );
 
   task wait_cycle();

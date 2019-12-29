@@ -44,7 +44,7 @@ endfunction
 
 task yuu_apb_master_monitor::main_phase(uvm_phase phase);
   wait(vif.preset_n === 1'b1);
-  @(vif.mon_cb);
+  vif.wait_cycle();
   fork
     forever begin
       monitor_item = yuu_apb_master_item::type_id::create("monitor_item");
@@ -61,7 +61,7 @@ task yuu_apb_master_monitor::collect();
   uvm_event observe_trans_end   = events.get($sformatf("%s_observe_trans_end", cfg.get_name()));
 
   while (vif.mon_cb.psel !== 1'b1)
-    @(vif.mon_cb);
+    vif.wait_cycle();
 
   observe_trans_begin.trigger();
 
@@ -72,23 +72,23 @@ task yuu_apb_master_monitor::collect();
   monitor_item.strb = vif.mon_cb.pstrb;
   {monitor_item.prot2, monitor_item.prot1, monitor_item.prot0} = vif.mon_cb.pprot;
   while (vif.mon_cb.penable !== 1'b1)
-    @(vif.mon_cb);
+    vif.wait_cycle();
   if (cfg.apb3_enable) begin
     while (vif.mon_cb.pready !== 1'b1)
-      @(vif.mon_cb);
+      vif.wait_cycle();
     monitor_item.resp = yuu_apb_response_e'(vif.mon_cb.pslverr);
   end
   if (monitor_item.direction == READ)
     monitor_item.data = vif.mon_cb.prdata;
   out_monitor_ap.write(monitor_item);
   `uvm_info("collect", $sformatf("Collected yuu_apb_master transaction (Direction:%s Addr:%8h Data:%8h)", monitor_item.direction, monitor_item.addr, monitor_item.data), UVM_HIGH)
-  @(vif.mon_cb);
+  vif.wait_cycle();
 
   observe_trans_end.trigger();
 endtask
 
 task yuu_apb_master_monitor::wait_reset(uvm_phase phase);
-  @(negedge vif.preset_n);
+  @(negedge vif.mon_mp.preset_n);
   phase.jump(uvm_reset_phase::get());
 endtask
 

@@ -92,7 +92,7 @@ task yuu_apb_slave_monitor::collect();
 endtask
 
 task yuu_apb_slave_monitor::wait_reset(uvm_phase phase);
-  @(negedge vif.preset_n);
+  @(negedge vif.mon_mp.preset_n);
   phase.jump(uvm_reset_phase::get());
 endtask
 

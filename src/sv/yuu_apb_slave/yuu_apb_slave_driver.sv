@@ -134,15 +134,17 @@ task yuu_apb_slave_driver::drive_bus();
     if (req.resp != ERROR) begin 
       m_mem.read(req.addr, data);
       vif.drv_cb.prdata <= data;
+      req.data = data;
     end
     else begin
       vif.drv_cb.prdata <= 'h0;
+      req.data = 'h0;
     end
   end
   if (cfg.apb3_enable && req.resp == ERROR) begin 
     vif.drv_cb.pslverr <= 1'b1;
   end
-  repeat(2) vif.wait_cycle();
+  vif.wait_cycle();
   vif.drv_cb.pslverr <= 1'b0;
 
   `uvm_do_callbacks(yuu_apb_slave_driver, yuu_apb_slave_driver_callback, post_send(this, req));
@@ -154,10 +156,11 @@ task yuu_apb_slave_driver::drive_bus();
   end
   seq_item_port.item_done(rsp);
   drive_trans_end.trigger();
+  vif.wait_cycle();
 endtask
 
 task yuu_apb_slave_driver::wait_reset(uvm_phase phase);
-  @(negedge vif.preset_n);
+  @(negedge vif.drv_mp.preset_n);
   phase.jump(uvm_reset_phase::get());
 endtask
 

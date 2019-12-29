@@ -49,7 +49,7 @@ endtask
 
 task yuu_apb_master_driver::main_phase(uvm_phase phase);
   wait(vif.preset_n === 1'b1);
-  @(vif.drv_cb);
+  vif.wait_cycle();
   fork
     forever begin
       get_and_drive();
@@ -79,6 +79,7 @@ task yuu_apb_master_driver::get_and_drive();
   `uvm_do_callbacks(yuu_apb_master_driver, yuu_apb_master_driver_callback, pre_send(this, req));
   drive_bus();
   `uvm_do_callbacks(yuu_apb_master_driver, yuu_apb_master_driver_callback, post_send(this, req));
+  out_driver_ap.write(req);
   rsp = yuu_apb_master_item::type_id::create("rsp");
   rsp.copy(req);
   rsp.set_id_info(req);
@@ -89,7 +90,7 @@ task yuu_apb_master_driver::drive_bus();
   uvm_event drive_trans_begin = events.get($sformatf("%s_drive_trans_begin", cfg.get_name()));
   uvm_event drive_trans_end   = events.get($sformatf("%s_drive_trans_end", cfg.get_name()));
 
-  repeat(req.idle_delay) @(vif.drv_cb);
+  repeat(req.idle_delay) vif.wait_cycle();
 
   drive_trans_begin.trigger();
 
@@ -100,13 +101,13 @@ task yuu_apb_master_driver::drive_bus();
   vif.drv_cb.pprot    <= {bit'(req.prot2), bit'(req.prot1), bit'(req.prot0)};
   if (req.direction == WRITE)
     vif.drv_cb.pwdata   <= req.data;
-  @(vif.drv_cb);
+  vif.wait_cycle();
   vif.drv_cb.penable  <= 1'b1;
-  @(vif.drv_cb);
+  vif.wait_cycle();
   if (cfg.apb3_enable) begin
     int count = 0;
     while(vif.drv_cb.pready !== 1'b1) begin
-      @(vif.drv_cb);
+      vif.wait_cycle();
       count ++;
       if (cfg.timeout > 0 && count >= cfg.timeout) begin
         `uvm_warning("drive_bus", "APB device timeout")
@@ -124,7 +125,7 @@ task yuu_apb_master_driver::drive_bus();
 endtask
 
 task yuu_apb_master_driver::wait_reset(uvm_phase phase);
-  @(negedge vif.preset_n);
+  @(negedge vif.drv_mp.preset_n);
   phase.jump(uvm_reset_phase::get());
 endtask
 
