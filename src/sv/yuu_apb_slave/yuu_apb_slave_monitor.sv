@@ -11,6 +11,7 @@ class yuu_apb_slave_monitor extends uvm_monitor;
 
   yuu_apb_slave_config cfg;
   uvm_event_pool events;
+  protected process processes[string];
 
   protected yuu_apb_slave_item monitor_item;
 
@@ -22,11 +23,11 @@ class yuu_apb_slave_monitor extends uvm_monitor;
   extern                   function      new(string name, uvm_component parent);
   extern           virtual function void build_phase(uvm_phase phase);
   extern           virtual function void connect_phase(uvm_phase phase);
-  extern           virtual task          reset_phase(uvm_phase phase);
-  extern           virtual task          main_phase(uvm_phase phase);
+  extern           virtual task          run_phase(uvm_phase phase);
 
+  extern protected virtual task          init_component();
   extern protected virtual task          collect();
-  extern protected virtual task          wait_reset(uvm_phase phase);
+  extern protected virtual task          wait_reset();
 endclass
 
 function yuu_apb_slave_monitor::new(string name, uvm_component parent);
@@ -42,24 +43,35 @@ function void yuu_apb_slave_monitor::connect_phase(uvm_phase phase);
   this.events = cfg.events;
 endfunction
 
-task yuu_apb_slave_monitor::reset_phase(uvm_phase phase);
-endtask
+task yuu_apb_slave_monitor::run_phase(uvm_phase phase);
+  process proc_monitor;
 
-task yuu_apb_slave_monitor::main_phase(uvm_phase phase);
+  init_component();
   wait(vif.preset_n === 1'b1);
   vif.wait_cycle();
   fork
-    forever begin
-      monitor_item = yuu_apb_slave_item::type_id::create("monitor_item");
-      monitor_item.cfg = cfg;
-      `uvm_do_callbacks(yuu_apb_slave_monitor, yuu_apb_slave_monitor_callback, pre_collect(this, monitor_item));
-      collect();
-      `uvm_do_callbacks(yuu_apb_slave_monitor, yuu_apb_slave_monitor_callback, post_collect(this, monitor_item));
+    forever begin 
+      wait(vif.mon_mp.preset_n === 1'b1);
+      fork
+        begin
+          proc_monitor = process::self();
+          processes["proc_monitor"] = proc_monitor;
+          monitor_item = yuu_apb_slave_item::type_id::create("monitor_item");
+          monitor_item.cfg = cfg;
+          `uvm_do_callbacks(yuu_apb_slave_monitor, yuu_apb_slave_monitor_callback, pre_collect(this, monitor_item));
+          collect();
+          `uvm_do_callbacks(yuu_apb_slave_monitor, yuu_apb_slave_monitor_callback, post_collect(this, monitor_item));
+        end
+      join
     end
-    wait_reset(phase);
+    wait_reset();
   join
 endtask
 
+
+task yuu_apb_slave_monitor::init_component();
+  return;
+endtask
 
 task yuu_apb_slave_monitor::collect();
   uvm_event observe_trans_begin = events.get($sformatf("%s_observe_trans_begin", cfg.get_name()));
@@ -91,9 +103,14 @@ task yuu_apb_slave_monitor::collect();
   observe_trans_end.trigger();
 endtask
 
-task yuu_apb_slave_monitor::wait_reset(uvm_phase phase);
-  @(negedge vif.mon_mp.preset_n);
-  phase.jump(uvm_reset_phase::get());
+task yuu_apb_slave_monitor::wait_reset();
+  forever begin
+    @(negedge vif.mon_mp.preset_n);
+    foreach (processes[i])
+      processes[i].kill();
+    init_component();
+    @(posedge vif.mon_mp.preset_n);
+  end
 endtask
 
 `endif

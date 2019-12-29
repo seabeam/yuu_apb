@@ -50,7 +50,7 @@ class yuu_apb_ral_case extends yuu_apb_base_case;
     cfg.slv_cfg[0].wait_enable = False;
   endfunction : build_phase
 
-  task main_phase(uvm_phase phase);
+  task run_phase(uvm_phase phase);
     yuu_master_ral_virtual_sequence seq;
 
     seq = yuu_master_ral_virtual_sequence::type_id::create("seq");
@@ -58,7 +58,7 @@ class yuu_apb_ral_case extends yuu_apb_base_case;
     phase.raise_objection(this);
     seq.start(vsequencer);
     phase.drop_objection(this);
-  endtask : main_phase
+  endtask : run_phase
 endclass : yuu_apb_ral_case
 
 `endif

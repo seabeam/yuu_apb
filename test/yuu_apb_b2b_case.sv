@@ -74,14 +74,14 @@ class yuu_apb_b2b_case extends yuu_apb_base_case;
     cfg.slv_cfg[0].wait_enable = False;
   endfunction : build_phase
   
-  task main_phase(uvm_phase phase);
+  task run_phase(uvm_phase phase);
     yuu_apb_b2b_virtual_sequence seq = yuu_apb_b2b_virtual_sequence::type_id::create("seq");
 
     phase.raise_objection(this);
     seq.start(vsequencer);
     wait_scb_done();
     phase.drop_objection(this);
-  endtask : main_phase
+  endtask : run_phase
 endclass : yuu_apb_b2b_case
 
 `endif

@@ -21,13 +21,13 @@ class yuu_apb_master_driver extends uvm_driver #(yuu_apb_master_item);
   extern                   function      new(string name = "yuu_apb_master_driver", uvm_component parent);
   extern           virtual function void build_phase(uvm_phase phase);
   extern           virtual function void connect_phase(uvm_phase phase);
-  extern           virtual task          reset_phase(uvm_phase phase);
-  extern           virtual task          main_phase(uvm_phase phase);
+  extern           virtual task          run_phase(uvm_phase phase);
 
+  extern protected virtual task          init_component();
   extern protected virtual task          reset_signal();
   extern protected virtual task          get_and_drive();
   extern protected virtual task          drive_bus();
-  extern protected virtual task          wait_reset(uvm_phase phase);
+  extern protected virtual task          wait_reset();
 endclass
 
 function yuu_apb_master_driver::new(string name = "yuu_apb_master_driver", uvm_component parent);
@@ -43,21 +43,29 @@ function void yuu_apb_master_driver::connect_phase(uvm_phase phase);
   this.events = cfg.events;
 endfunction
 
-task yuu_apb_master_driver::reset_phase(uvm_phase phase);
-  reset_signal();
-endtask
+task yuu_apb_master_driver::run_phase(uvm_phase phase);
+  process proc_drive;
 
-task yuu_apb_master_driver::main_phase(uvm_phase phase);
-  wait(vif.preset_n === 1'b1);
-  vif.wait_cycle();
+  init_component();
   fork
     forever begin
-      get_and_drive();
+      wait(vif.drv_mp.preset_n === 1'b1);
+      fork
+        begin
+          proc_drive = process::self();
+          processes["proc_drive"] = proc_drive;
+          get_and_drive();
+        end
+      join
     end
-    wait_reset(phase);
+    wait_reset();
   join
 endtask
 
+
+task yuu_apb_master_driver::init_component();
+  reset_signal();
+endtask
 
 task yuu_apb_master_driver::reset_signal();
   uvm_event reset_begin = events.get($sformatf("%s_reset_begin", cfg.get_name()));
@@ -124,9 +132,16 @@ task yuu_apb_master_driver::drive_bus();
   drive_trans_end.trigger();
 endtask
 
-task yuu_apb_master_driver::wait_reset(uvm_phase phase);
-  @(negedge vif.drv_mp.preset_n);
-  phase.jump(uvm_reset_phase::get());
+task yuu_apb_master_driver::wait_reset();
+  forever begin
+    @(negedge vif.drv_mp.preset_n);
+    if (seq_item_port.has_do_available())
+      seq_item_port.item_done();
+    foreach (processes[i])
+      processes[i].kill();
+    init_component();
+    @(posedge vif.drv_mp.preset_n);
+  end
 endtask
 
 `endif

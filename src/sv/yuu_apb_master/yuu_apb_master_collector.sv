@@ -30,7 +30,7 @@ class yuu_apb_master_collector extends uvm_subscriber #(yuu_apb_master_item);
 
   extern                   function      new(string name, uvm_component parent);
   extern           virtual function void connect_phase(uvm_phase phase);
-  extern           virtual task          main_phase(uvm_phase phase);
+  extern           virtual task          run_phase(uvm_phase phase);
 
   extern           virtual function void write(yuu_apb_master_item t);
 endclass
@@ -46,7 +46,7 @@ function void yuu_apb_master_collector::connect_phase(uvm_phase phase);
   this.events = cfg.events;
 endfunction
 
-task yuu_apb_master_collector::main_phase(uvm_phase phase);
+task yuu_apb_master_collector::run_phase(uvm_phase phase);
 endtask
 
 

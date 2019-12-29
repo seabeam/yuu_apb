@@ -60,6 +60,7 @@
 ../test/yuu_apb_direct_case.sv
 ../test/yuu_apb_b2b_case.sv
 ../test/yuu_apb_ral_case.sv
+../test/yuu_apb_reset_case.sv
 
 //-------------------------------------
 // Top Module

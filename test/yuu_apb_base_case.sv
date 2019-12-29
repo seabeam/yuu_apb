@@ -17,6 +17,8 @@ import yuu_apb_pkg::*;
 `uvm_analysis_imp_decl(_slave_driver)
 `uvm_analysis_imp_decl(_slave_monitor)
 class yuu_apb_mini_scoreboard extends uvm_scoreboard;
+  virtual yuu_apb_master_interface vif;
+
   uvm_analysis_imp_master_driver  #(yuu_apb_master_item, yuu_apb_mini_scoreboard) mst_drv_export;
   uvm_analysis_imp_master_monitor #(yuu_apb_master_item, yuu_apb_mini_scoreboard) mst_mon_export;
   uvm_analysis_imp_slave_driver   #(yuu_apb_slave_item, yuu_apb_mini_scoreboard)  slv_drv_export;
@@ -26,6 +28,8 @@ class yuu_apb_mini_scoreboard extends uvm_scoreboard;
   yuu_apb_master_item mst_mon_item_q[$];
   yuu_apb_slave_item  slv_drv_item_q[$];
   yuu_apb_slave_item  slv_mon_item_q[$];
+
+  process processes[string];
   `uvm_component_utils(yuu_apb_mini_scoreboard)
 
   function new(string name, uvm_component parent);
@@ -55,21 +59,50 @@ class yuu_apb_mini_scoreboard extends uvm_scoreboard;
     slv_mon_item_q.push_back(t);
   endfunction
 
-  task main_phase(uvm_phase phase);
+  task run_phase(uvm_phase phase);
+    process proc_compare;
     yuu_apb_master_item   m0, m1;
     yuu_apb_slave_item    s0, s1;
 
-    forever begin
-      wait(mst_drv_item_q.size() > 0);
-      wait(mst_mon_item_q.size() > 0);
-      wait(slv_drv_item_q.size() > 0);
-      wait(slv_mon_item_q.size() > 0);
+    fork
+      forever begin 
+        wait(vif.mon_mp.preset_n === 1'b1);
+        fork
+          begin
+            proc_compare = process::self();
+            processes["proc_compare"] = proc_compare;
+            wait(mst_drv_item_q.size() > 0);
+            wait(mst_mon_item_q.size() > 0);
+            wait(slv_drv_item_q.size() > 0);
+            wait(slv_mon_item_q.size() > 0);
 
-      m0 = mst_drv_item_q.pop_front();
-      m1 = mst_mon_item_q.pop_front();
-      s0 = slv_drv_item_q.pop_front();
-      s1 = slv_mon_item_q.pop_front();
-      $display("[Scoreboard] %0h, %0h, %0h, %0h", m0.data, m1.data, s0.data, s1.data);
+            m0 = mst_drv_item_q.pop_front();
+            m1 = mst_mon_item_q.pop_front();
+            s0 = slv_drv_item_q.pop_front();
+            s1 = slv_mon_item_q.pop_front();
+            $display("[Scoreboard] %0h, %0h, %0h, %0h", m0.data, m1.data, s0.data, s1.data);
+          end
+        join
+      end
+      wait_reset();
+    join
+  endtask
+
+
+  task init_component();
+    mst_mon_item_q.delete();
+    mst_mon_item_q.delete();
+    slv_drv_item_q.delete();
+    slv_mon_item_q.delete();
+  endtask
+
+  task wait_reset();
+    forever begin
+      @(negedge vif.mon_mp.preset_n);
+      foreach (processes[i])
+        processes[i].kill();
+      init_component();
+      @(posedge vif.mon_mp.preset_n);
     end
   endtask
 endclass : yuu_apb_mini_scoreboard
@@ -93,8 +126,9 @@ class yuu_apb_base_case extends uvm_test;
   function void build_phase(uvm_phase phase);
     cfg = new("cfg");
     cfg.events = new("events");
-    uvm_config_db#(virtual yuu_apb_interface)::get(null, get_full_name(), "vif", cfg.apb_if);
+    uvm_config_db#(virtual yuu_apb_interface)::get(null, get_full_name(), "vif", vif);
   
+    cfg.apb_if = vif;
     begin
       yuu_apb_master_config m_cfg = new("e0_m0");
       m_cfg.apb3_enable = True;
@@ -129,6 +163,7 @@ class yuu_apb_base_case extends uvm_test;
       env.master[0].predictor.map = model.default_map;
     vsequencer = env.vsequencer;
 
+    scb.vif = cfg.mst_cfg[0].vif;
     env.master[0].out_driver_ap.connect(scb.mst_drv_export);
     env.master[0].out_monitor_ap.connect(scb.mst_mon_export);
     env.slave[0].out_driver_ap.connect(scb.slv_drv_export);
