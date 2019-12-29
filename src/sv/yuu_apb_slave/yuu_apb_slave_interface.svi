@@ -15,7 +15,7 @@ interface yuu_apb_slave_interface();
   logic [`YUU_APB_DATA_WIDTH-1:0]   pwdata;
   logic [`YUU_APB_DATA_WIDTH-1:0]   prdata;
   logic                             psel;
-  
+
   // AMBA3 APB Protocol Specification v1.0
   logic                             pready;
   logic                             pslverr;
@@ -25,6 +25,9 @@ interface yuu_apb_slave_interface();
   logic [`YUU_APB_DATA_WIDTH/8-1:0] pstrb;
 
   clocking cb @(posedge pclk);
+  endclocking
+
+  clocking drv_cb @(posedge pclk);
     default input #`YUU_APB_SLAVE_INPUT_TIME output #`YUU_APB_SLAVE_OUTPUT_TIME;
 
     input  paddr;
@@ -56,7 +59,7 @@ interface yuu_apb_slave_interface();
     input  pslverr;
   endclocking
 
-  modport async (
+  modport drv_mp (
     input  paddr,
     input  penable,
     input  pwrite,
@@ -69,6 +72,24 @@ interface yuu_apb_slave_interface();
     output pready,
     output pslverr
   );
+
+  modport mon_mp (
+    input  paddr,
+    input  penable,
+    input  pwrite,
+    input  pwdata,
+    input  psel,
+    input  pstrb,
+    input  pprot,
+
+    input  prdata,
+    input  pready,
+    input  pslverr
+  );
+
+  task wait_cycle();
+    @(posedge pclk);
+  endtask
 endinterface
 
 `endif

@@ -6,6 +6,8 @@
 `define YUU_APB_MASTER_ADAPTER_SV
 
 class yuu_apb_master_adapter extends uvm_reg_adapter;
+  yuu_apb_master_config cfg;
+
   `uvm_object_utils(yuu_apb_master_adapter)
 
   function new(string name = "yuu_apb_master_adapter");

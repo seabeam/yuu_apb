@@ -11,20 +11,22 @@ class yuu_apb_master_monitor extends uvm_monitor;
   
   yuu_apb_master_config cfg;
   uvm_event_pool events;
+  protected process processes[string];
 
-  yuu_apb_master_item item;
+  protected yuu_apb_master_item monitor_item;
 
   `uvm_register_cb(yuu_apb_master_monitor, yuu_apb_master_monitor_callback)
 
   `uvm_component_utils_begin(yuu_apb_master_monitor)
   `uvm_component_utils_end
 
-  extern                   function      new          (string name, uvm_component parent);
-  extern           virtual function void build_phase  (uvm_phase phase);
+  extern                   function      new(string name, uvm_component parent);
+  extern           virtual function void build_phase(uvm_phase phase);
   extern           virtual function void connect_phase(uvm_phase phase);
-  extern           virtual task          main_phase   (uvm_phase phase);
-  extern protected virtual task          collect      ();
-  extern protected virtual task          wait_reset   (uvm_phase phase);
+  extern           virtual task          main_phase(uvm_phase phase);
+
+  extern protected virtual task          collect();
+  extern protected virtual task          wait_reset(uvm_phase phase);
 endclass
 
 function yuu_apb_master_monitor::new(string name, uvm_component parent);
@@ -32,14 +34,12 @@ function yuu_apb_master_monitor::new(string name, uvm_component parent);
 endfunction
 
 function void yuu_apb_master_monitor::build_phase(uvm_phase phase);
-  if (cfg == null)
-    `uvm_fatal("build_phase", "yuu_apb_master agent configuration is null")
   out_monitor_ap = new("out_monitor_ap", this);
 endfunction
 
 function void yuu_apb_master_monitor::connect_phase(uvm_phase phase);
   this.vif = cfg.vif;
-  events = cfg.events;
+  this.events = cfg.events;
 endfunction
 
 task yuu_apb_master_monitor::main_phase(uvm_phase phase);
@@ -47,10 +47,10 @@ task yuu_apb_master_monitor::main_phase(uvm_phase phase);
   @(vif.mon_cb);
   fork
     forever begin
-      item = yuu_apb_master_item::type_id::create("mon_item");
-      `uvm_do_callbacks(yuu_apb_master_monitor, yuu_apb_master_monitor_callback, pre_collect(this, item));
+      monitor_item = yuu_apb_master_item::type_id::create("monitor_item");
+      `uvm_do_callbacks(yuu_apb_master_monitor, yuu_apb_master_monitor_callback, pre_collect(this, monitor_item));
       collect();
-      `uvm_do_callbacks(yuu_apb_master_monitor, yuu_apb_master_monitor_callback, post_collect(this, item));
+      `uvm_do_callbacks(yuu_apb_master_monitor, yuu_apb_master_monitor_callback, post_collect(this, monitor_item));
     end
     wait_reset(phase);
   join
@@ -65,25 +65,23 @@ task yuu_apb_master_monitor::collect();
 
   observe_trans_begin.trigger();
 
-  item.addr       = vif.mon_cb.paddr;
-  item.direction  = yuu_apb_direction_e'(vif.mon_cb.pwrite);
-  if (item.direction == WRITE)
-    item.data = vif.mon_cb.pwdata;
-  if (cfg.apb4_enable) begin
-    item.strb = vif.mon_cb.pstrb;
-    {item.prot2, item.prot1, item.prot0} = vif.mon_cb.pprot;
-  end
+  monitor_item.addr       = vif.mon_cb.paddr;
+  monitor_item.direction  = yuu_apb_direction_e'(vif.mon_cb.pwrite);
+  if (monitor_item.direction == WRITE)
+    monitor_item.data = vif.mon_cb.pwdata;
+  monitor_item.strb = vif.mon_cb.pstrb;
+  {monitor_item.prot2, monitor_item.prot1, monitor_item.prot0} = vif.mon_cb.pprot;
   while (vif.mon_cb.penable !== 1'b1)
     @(vif.mon_cb);
   if (cfg.apb3_enable) begin
     while (vif.mon_cb.pready !== 1'b1)
       @(vif.mon_cb);
-    item.resp = yuu_apb_response_e'(vif.cb.pslverr);
+    monitor_item.resp = yuu_apb_response_e'(vif.mon_cb.pslverr);
   end
-  if (item.direction == READ)
-    item.data = vif.mon_cb.prdata;
-  out_monitor_ap.write(item);
-  `uvm_info("collect", $sformatf("Collected yuu_apb_master transaction (Direction:%s Addr:%8h Data:%8h)", item.direction, item.addr, item.data), UVM_HIGH)
+  if (monitor_item.direction == READ)
+    monitor_item.data = vif.mon_cb.prdata;
+  out_monitor_ap.write(monitor_item);
+  `uvm_info("collect", $sformatf("Collected yuu_apb_master transaction (Direction:%s Addr:%8h Data:%8h)", monitor_item.direction, monitor_item.addr, monitor_item.data), UVM_HIGH)
   @(vif.mon_cb);
 
   observe_trans_end.trigger();

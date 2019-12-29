@@ -28,32 +28,7 @@ class yuu_apb_slave_sequence_base extends uvm_sequence #(yuu_apb_slave_item);
   endtask
 
   task body();
-    return;
-  endtask
-endclass
-
-
-class yuu_apb_slave_response_sequence extends yuu_apb_slave_sequence_base;
-  `uvm_object_utils(yuu_apb_slave_response_sequence)
-
-  function new(string name="yuu_apb_slave_response_sequence");
-    super.new(name);
-  endfunction
-
-
-  task body();
-    super.body();
-    
-    if (req == null)
-      req = yuu_apb_slave_item::type_id::create("req");
-    start_item(req);
-    finish_item(req);
-  endtask
-
-  task set_item(input yuu_apb_slave_item item);
-    req = yuu_apb_slave_item::type_id::create("req");
-    
-    req.copy(item);
+    `uvm_warning("body", "The body task should be OVERRIDED by derived class")
   endtask
 endclass
 

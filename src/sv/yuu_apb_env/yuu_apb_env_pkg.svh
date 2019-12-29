@@ -6,6 +6,7 @@
 `define YUU_APB_ENV_PKG_SVH
 
   `include "yuu_apb_env_config.sv"
+  `include "yuu_apb_virtual_sequencer.sv"
   `include "yuu_apb_env.sv"
 
 `endif

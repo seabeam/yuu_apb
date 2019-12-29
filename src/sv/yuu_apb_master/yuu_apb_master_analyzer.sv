@@ -19,28 +19,23 @@ class yuu_apb_master_analyzer extends uvm_subscriber #(yuu_apb_master_item);
   `uvm_component_utils_begin(yuu_apb_master_analyzer)
   `uvm_component_utils_end
 
-  extern                   function      new            (string name, uvm_component parent);
-  extern           virtual function void build_phase    (uvm_phase phase);
-  extern           virtual function void connect_phase  (uvm_phase phase);
-  extern           virtual task          main_phase     (uvm_phase phase);
-  extern           virtual function void report_phase   (uvm_phase phase);
-  extern           virtual function void write          (yuu_apb_master_item t);
-  extern protected virtual task          measure_start  (); 
-  extern protected virtual task          measure_end    (); 
+  extern                   function      new(string name, uvm_component parent);
+  extern           virtual function void connect_phase(uvm_phase phase);
+  extern           virtual task          main_phase(uvm_phase phase);
+  extern           virtual function void report_phase(uvm_phase phase);
+
+  extern           virtual function void write(yuu_apb_master_item t);
+  extern protected virtual task          measure_start();
+  extern protected virtual task          measure_end();
 endclass
 
 function yuu_apb_master_analyzer::new(string name, uvm_component parent);
   super.new(name, parent);
 endfunction
 
-function void yuu_apb_master_analyzer::build_phase(uvm_phase phase);
-  if (cfg == null)
-    `uvm_fatal("build_phase", "yuu_apb_master agent configuration is null")
-endfunction
-
 function void yuu_apb_master_analyzer::connect_phase(uvm_phase phase);
   this.vif = cfg.vif;
-  events = cfg.events;
+  this.events = cfg.events;
 endfunction
 
 task yuu_apb_master_analyzer::main_phase(uvm_phase phase);

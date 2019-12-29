@@ -19,28 +19,23 @@ class yuu_apb_slave_analyzer extends uvm_subscriber #(yuu_apb_slave_item);
   `uvm_component_utils_begin(yuu_apb_slave_analyzer)
   `uvm_component_utils_end
 
-  extern                   function      new            (string name, uvm_component parent);
-  extern           virtual function void build_phase    (uvm_phase phase);
-  extern           virtual function void connect_phase  (uvm_phase phase);
-  extern           virtual task          main_phase     (uvm_phase phase);
-  extern           virtual function void report_phase   (uvm_phase phase);
-  extern           virtual function void write          (yuu_apb_slave_item t);
-  extern protected virtual task          measure_start  (); 
-  extern protected virtual task          measure_end    (); 
+  extern                   function      new(string name, uvm_component parent);
+  extern           virtual function void connect_phase(uvm_phase phase);
+  extern           virtual task          main_phase(uvm_phase phase);
+  extern           virtual function void report_phase(uvm_phase phase);
+
+  extern           virtual function void write(yuu_apb_slave_item t);
+  extern protected virtual task          measure_start();
+  extern protected virtual task          measure_end();
 endclass
 
 function yuu_apb_slave_analyzer::new(string name, uvm_component parent);
   super.new(name, parent);
 endfunction
 
-function void yuu_apb_slave_analyzer::build_phase(uvm_phase phase);
-  if (cfg == null)
-    `uvm_fatal("build_phase", "yuu_apb_slave agent configuration is null")
-endfunction
-
 function void yuu_apb_slave_analyzer::connect_phase(uvm_phase phase);
   this.vif = cfg.vif;
-  events = cfg.events;
+  this.events = cfg.events;
 endfunction
 
 task yuu_apb_slave_analyzer::main_phase(uvm_phase phase);
@@ -59,6 +54,7 @@ function void yuu_apb_slave_analyzer::report_phase(uvm_phase phase);
   tput_rate = real'(m_count)/(m_end_time - m_start_time) * 1000;
   `uvm_info("report_phase", $sformatf("APB slave speed is %f", tput_rate), UVM_LOW);
 endfunction
+
 
 function void yuu_apb_slave_analyzer::write(yuu_apb_slave_item t);
   if (m_start)

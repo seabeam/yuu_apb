@@ -5,24 +5,22 @@
 `ifndef YUU_APB_SLAVE_CONFIG_SV
 `define YUU_APB_SLAVE_CONFIG_SV
 
-typedef class yuu_apb_slave_sequencer;
 class yuu_apb_slave_config extends yuu_apb_agent_config;
   virtual yuu_apb_slave_interface vif;
 
+            boolean wait_enable = True;
+            boolean use_response= False;
   protected boolean multi_range = False;
-  boolean wait_enable = True;
-  boolean always_okay = True;
-  boolean use_random_data = False;
-  yuu_apb_slave_sequencer sequencer_ptr;
+  yuu_common_mem_pattern_e mem_init_pattern = PATTERN_ALL_0;
 
   yuu_amba_addr_map maps[];
 
   `uvm_object_utils_begin(yuu_apb_slave_config)
-    `uvm_field_enum        (boolean, wait_enable,     UVM_PRINT | UVM_COPY)
-    `uvm_field_enum        (boolean, always_okay,     UVM_PRINT | UVM_COPY)
-    `uvm_field_enum        (boolean, use_random_data, UVM_PRINT | UVM_COPY)
-    `uvm_field_enum        (boolean, multi_range,     UVM_PRINT | UVM_COPY)
-    `uvm_field_array_object(maps,                     UVM_PRINT | UVM_COPY)
+    `uvm_field_enum        (boolean,                  wait_enable,     UVM_PRINT | UVM_COPY)
+    `uvm_field_enum        (boolean,                  use_response,    UVM_PRINT | UVM_COPY)
+    `uvm_field_enum        (boolean,                  multi_range,     UVM_PRINT | UVM_COPY)
+    `uvm_field_enum        (yuu_common_mem_pattern_e, mem_init_pattern,UVM_PRINT | UVM_COPY)
+    `uvm_field_array_object(                          maps,            UVM_PRINT | UVM_COPY)
   `uvm_object_utils_end
 
   function new(string name = "yuu_apb_slave_config");

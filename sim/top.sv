@@ -6,15 +6,7 @@ import yuu_apb_pkg::*;
 `include "yuu_apb_defines.svh"
 `include "yuu_apb_interface.svi"
 
-class uvc_wo_callback extends yuu_apb_slave_driver_callback;
-  virtual task pre_send(yuu_apb_slave_driver driver, yuu_apb_slave_item item);
-    item.error_object.error_type = WRITE_ONLY;
-  endtask
-endclass : uvc_wo_callback
-
-class uvc_test_sequence extends uvm_sequence#(uvm_sequence_item);
-  yuu_apb_master_config cfg;
-
+class uvc_test_sequence extends yuu_apb_master_sequence_base;
   `uvm_object_utils(uvc_test_sequence)
 
   function new(string name="uvc_test_sequence");
@@ -22,25 +14,48 @@ class uvc_test_sequence extends uvm_sequence#(uvm_sequence_item);
   endfunction : new
 
   task body();
-    bit[31:0] addr;
     yuu_apb_master_item m_item;
 
-    m_item = new("m_item");
-    m_item.cfg = cfg;
-    m_item.randomize() with {direction == WRITE;};
-    addr = m_item.addr;
-    $display("data = %8h", m_item.data);
-    start_item(m_item);
-    finish_item(m_item);
-    m_item.data = 0;
+    for (int i=0; i<4; i++) begin
+      m_item = new("m_item");
+      m_item.cfg = cfg;
+      m_item.randomize() with {direction == WRITE;
+                               addr == 32'h1000_0000+i;};
+      start_item(m_item);
+      finish_item(m_item);
+      $display("addr = %8h data = %8h", m_item.addr, m_item.data);
+    end
 
-    m_item.randomize() with {direction == READ;};
-    m_item.addr = addr;
-    start_item(m_item);
-    finish_item(m_item);
-    $display("data = %8h", m_item.data);
+    for (int i=0; i<4; i++) begin
+      m_item = new("m_item");
+      m_item.cfg = cfg;
+      m_item.randomize() with {direction == READ;
+                               addr == 32'h1000_0000+i;};
+      start_item(m_item);
+      finish_item(m_item);
+      $display("addr = %8h data = %8h", m_item.addr, m_item.data);
+    end
   endtask
 endclass : uvc_test_sequence
+
+class yuu_apb_response_sequence extends yuu_apb_slave_sequence_base;
+  `uvm_object_utils(yuu_apb_slave_sequence_base)
+
+  function new(string name = "yuu_apb_slave_response_sequence");
+    super.new(name);
+  endfunction
+
+  task body();
+    forever begin
+      req = yuu_apb_slave_item::type_id::create("req");
+      req.cfg = cfg;
+      start_item(req);
+      req.randomize() with {resp == OKAY;};
+      finish_item(req);
+    end
+  endtask
+endclass
+
 
 class uvc_test extends uvm_test;
   virtual yuu_apb_interface vif;
@@ -73,7 +88,6 @@ class uvc_test extends uvm_test;
       s_cfg.wait_enable = True;
       s_cfg.index = 0;
       s_cfg.set_map(0, 32'hF000_0000);
-      s_cfg.use_random_data = True;
       cfg.set_config(s_cfg);
     end
 
@@ -81,34 +95,19 @@ class uvc_test extends uvm_test;
     env = yuu_apb_env::type_id::create("env", this);
   endfunction : build_phase
 
-  function void end_of_elaboration_phase(uvm_phase phase);
-    uvc_wo_callback wo_cb = new();
-    //uvm_callbacks #(yuu_apb_slave_driver, yuu_apb_slave_driver_callback)::add(env.slave[0].driver, wo_cb);
-    uvm_callbacks #(yuu_apb_slave_driver, yuu_apb_slave_driver_callback)::display();
-  endfunction
-
   task main_phase(uvm_phase phase);
     uvc_test_sequence seq = new("seq");
+    yuu_apb_response_sequence rsp_seq = new("rsp_seq");
 
-    seq.cfg = cfg.mst_cfg[0];
     phase.phase_done.set_drain_time(this, 100);
     phase.raise_objection(this);
     fork
-      seq.start(env.master[0].sequencer);
-      wait_event();
+      seq.start(env.vsequencer.master_sequencer[0]);
+      rsp_seq.start(env.vsequencer.slave_sequencer[0]);
     join_any
-    disable fork;
     phase.drop_objection(this);
   endtask : main_phase
 
-  task wait_event();
-    forever begin
-      uvm_event e = cfg.events.get("e0_m0_drive_trans_begin");
-
-      e.wait_trigger();
-      $display("Begin @ %t", $realtime());
-    end
-  endtask
 endclass : uvc_test
 
 module dummy(

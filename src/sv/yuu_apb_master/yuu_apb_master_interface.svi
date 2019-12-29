@@ -25,6 +25,9 @@ interface yuu_apb_master_interface();
   logic [`YUU_APB_DATA_WIDTH/8-1:0] pstrb;
 
   clocking cb @(posedge pclk);
+  endclocking
+
+  clocking drv_cb @(posedge pclk);
     default input #`YUU_APB_MASTER_INPUT_TIME output #`YUU_APB_MASTER_OUTPUT_TIME;
 
     output  paddr;
@@ -55,6 +58,38 @@ interface yuu_apb_master_interface();
     input   pready;
     input   pslverr;
   endclocking
+
+  modport drv_mp (
+    output  paddr,
+    output  penable,
+    output  pwrite,
+    output  pwdata,
+    output  psel,
+    output  pstrb,
+    output  pprot,
+
+    input   prdata,
+    input   pready,
+    input   pslverr
+  );
+
+  modport mon_mp (
+    output  paddr,
+    output  penable,
+    output  pwrite,
+    output  pwdata,
+    output  psel,
+    output  pstrb,
+    output  pprot,
+
+    input   prdata,
+    input   pready,
+    input   pslverr
+  );
+
+  task wait_cycle();
+    @(posedge pclk);
+  endtask
 endinterface
 
 `endif

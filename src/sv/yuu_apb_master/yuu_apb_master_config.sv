@@ -9,11 +9,13 @@ class yuu_apb_master_config extends yuu_apb_agent_config;
   virtual yuu_apb_master_interface vif;
 
   boolean idle_enable = True;
+  boolean use_reg_model = False;
 
   yuu_amba_addr_map addressable_maps[];
 
   `uvm_object_utils_begin(yuu_apb_master_config)
     `uvm_field_enum        (boolean, idle_enable,      UVM_PRINT | UVM_COPY)
+    `uvm_field_enum        (boolean, use_reg_model,    UVM_PRINT | UVM_COPY)
     `uvm_field_array_object(         addressable_maps, UVM_PRINT | UVM_COPY)
   `uvm_object_utils_end
 

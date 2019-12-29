@@ -9,7 +9,9 @@ class yuu_apb_agent_config extends uvm_object;
   uvm_event_pool events;
 
   int index = -1;
-  int timeout = 0;
+  int unsigned addr_width = `YUU_APB_ADDR_WIDTH;
+  int unsigned data_width = `YUU_APB_DATA_WIDTH;
+  int unsigned timeout = 0;
   uvm_active_passive_enum is_active = UVM_ACTIVE;
 
   boolean coverage_enable = False;
@@ -21,17 +23,19 @@ class yuu_apb_agent_config extends uvm_object;
   boolean protocol_check_enable = True;
 
   `uvm_object_utils_begin(yuu_apb_agent_config)
-    `uvm_field_int(index, UVM_PRINT | UVM_COPY)
-    `uvm_field_int(timeout, UVM_PRINT | UVM_COPY)
-    `uvm_field_enum(uvm_active_passive_enum, is_active, UVM_PRINT | UVM_COPY)
-    `uvm_field_enum(boolean, coverage_enable, UVM_PRINT | UVM_COPY)
-    `uvm_field_enum(boolean, analysis_enable, UVM_PRINT | UVM_COPY)
-    `uvm_field_enum(boolean, apb3_enable, UVM_PRINT | UVM_COPY)
-    `uvm_field_enum(boolean, apb4_enable, UVM_PRINT | UVM_COPY)
-    `uvm_field_enum(boolean, protocol_check_enable, UVM_PRINT | UVM_COPY)
+    `uvm_field_int  (                         index,                UVM_PRINT | UVM_COPY)
+    `uvm_field_int  (                         addr_width,           UVM_PRINT | UVM_COPY)
+    `uvm_field_int  (                         data_width,           UVM_PRINT | UVM_COPY)
+    `uvm_field_int  (                         timeout,              UVM_PRINT | UVM_COPY)
+    `uvm_field_enum (uvm_active_passive_enum, is_active,            UVM_PRINT | UVM_COPY)
+    `uvm_field_enum (boolean,                 coverage_enable,      UVM_PRINT | UVM_COPY)
+    `uvm_field_enum (boolean,                 analysis_enable,      UVM_PRINT | UVM_COPY)
+    `uvm_field_enum (boolean,                 apb3_enable,          UVM_PRINT | UVM_COPY)
+    `uvm_field_enum (boolean,                 apb4_enable,          UVM_PRINT | UVM_COPY)
+    `uvm_field_enum (boolean,                 protocol_check_enable,UVM_PRINT | UVM_COPY)
   `uvm_object_utils_end 
 
-  function new (string name = "yuu_apb_agent_config");
+  function new(string name = "yuu_apb_agent_config");
     super.new(name);
   endfunction
 endclass

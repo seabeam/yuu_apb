@@ -6,21 +6,21 @@
 `define YUU_APB_ERROR_SV
 
 class yuu_apb_error extends uvm_object;
-  int unsigned no_error_wt = 100;
-  int unsigned invalid_addr_wt = 0;
-  int unsigned read_only_wt = 0;
-  int unsigned write_only_wt = 0;
-  int unsigned currupt_data_wt = 0;
+  int unsigned no_error_wt      = 100;
+  int unsigned invalid_addr_wt  = 0;
+  int unsigned read_only_wt     = 0;
+  int unsigned write_only_wt    = 0;
+  int unsigned currupt_data_wt  = 0;
 
   rand e_yuu_apb_error_type error_type;
 
   constraint c_error_type {
     error_type dist {
-      NO_ERROR        := no_error_wt,
-      INVALID_ADDR    := invalid_addr_wt,
-      READ_ONLY       := read_only_wt,
-      WRITE_ONLY      := write_only_wt,
-      CURRUPT_DATA    := currupt_data_wt
+      NO_ERROR      := no_error_wt,
+      INVALID_ADDR  := invalid_addr_wt,
+      READ_ONLY     := read_only_wt,
+      WRITE_ONLY    := write_only_wt,
+      CURRUPT_DATA  := currupt_data_wt
     };
   }
  

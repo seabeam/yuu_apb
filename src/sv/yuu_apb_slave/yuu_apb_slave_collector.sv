@@ -9,6 +9,7 @@ class yuu_apb_slave_collector extends uvm_subscriber #(yuu_apb_slave_item);
   virtual yuu_apb_slave_interface vif;
 
   yuu_apb_slave_config cfg;
+  uvm_event_pool events;
 
   yuu_apb_slave_item item;
 
@@ -27,11 +28,11 @@ class yuu_apb_slave_collector extends uvm_subscriber #(yuu_apb_slave_item);
   `uvm_component_utils_begin(yuu_apb_slave_collector)
   `uvm_component_utils_end
 
-  extern                   function      new              (string name, uvm_component parent);
-  extern           virtual function void build_phase      (uvm_phase phase);
-  extern           virtual function void connect_phase    (uvm_phase phase);
-  extern           virtual task          main_phase       (uvm_phase phase);
-  extern           virtual function void write            (yuu_apb_slave_item t);
+  extern                   function      new(string name, uvm_component parent);
+  extern           virtual function void connect_phase(uvm_phase phase);
+  extern           virtual task          main_phase(uvm_phase phase);
+
+  extern           virtual function void write(yuu_apb_slave_item t);
 endclass
 
 function yuu_apb_slave_collector::new(string name, uvm_component parent);
@@ -40,13 +41,9 @@ function yuu_apb_slave_collector::new(string name, uvm_component parent);
   apb_transaction_cg = new;
 endfunction
 
-function void yuu_apb_slave_collector::build_phase(uvm_phase phase);
-  if (cfg == null)
-    `uvm_fatal("build_phase", "yuu_apb_slave agent configuration is null")
-endfunction
-
 function void yuu_apb_slave_collector::connect_phase(uvm_phase phase);
   this.vif = cfg.vif;
+  this.events = cfg.events;
 endfunction
 
 task yuu_apb_slave_collector::main_phase(uvm_phase phase);

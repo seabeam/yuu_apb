@@ -19,6 +19,8 @@
   `ifndef YUU_APB_DATA_WIDTH
   `define YUU_APB_DATA_WIDTH 32
   `endif
+
+  `define YUU_APB_STRB_WIDTH  $clog2(`YUU_APB_DATA_WIDTH/8)
   
   `ifndef YUU_APB_MASTER_INPUT_TIME
   `define YUU_APB_MASTER_INPUT_TIME  1ns

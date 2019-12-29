@@ -9,10 +9,11 @@ class yuu_apb_item extends yuu_amba_item;
   rand yuu_apb_addr_t      addr;
   rand yuu_apb_data_t      data;
   rand yuu_apb_direction_e direction;
+  rand yuu_apb_response_e  resp;
        yuu_apb_strb_t      strb;
-  rand yuu_apb_prot0_e     prot0;
-  rand yuu_apb_prot1_e     prot1;
-  rand yuu_apb_prot2_e     prot2;
+  rand yuu_apb_prot0_e     prot0  = PRIVILEGED;
+  rand yuu_apb_prot1_e     prot1  = NON_SECURE;
+  rand yuu_apb_prot2_e     prot2  = DATA;
 
        yuu_apb_error error_object;
 
@@ -29,15 +30,20 @@ class yuu_apb_item extends yuu_amba_item;
     burst_type == INCR;
   }
 
+  constraint c_data {
+    direction == READ -> data == 'h0;
+  }
+
   `uvm_object_utils_begin(yuu_apb_item)
-    `uvm_field_int(addr, UVM_DEFAULT)
-    `uvm_field_int(data, UVM_DEFAULT)
-    `uvm_field_enum(yuu_apb_direction_e, direction, UVM_DEFAULT | UVM_NOCOMPARE)
-    `uvm_field_int(strb, UVM_DEFAULT | UVM_NOCOMPARE)
-    `uvm_field_enum(yuu_apb_prot0_e, prot0, UVM_DEFAULT | UVM_NOCOMPARE)
-    `uvm_field_enum(yuu_apb_prot1_e, prot1, UVM_DEFAULT | UVM_NOCOMPARE)
-    `uvm_field_enum(yuu_apb_prot2_e, prot2, UVM_DEFAULT | UVM_NOCOMPARE)
-    `uvm_field_object(error_object, UVM_DEFAULT | UVM_NOCOMPARE)
+    `uvm_field_int    (                     addr,         UVM_DEFAULT)
+    `uvm_field_int    (                     data,         UVM_DEFAULT)
+    `uvm_field_enum   (yuu_apb_direction_e, direction,    UVM_DEFAULT | UVM_NOCOMPARE)
+    `uvm_field_enum   (yuu_apb_response_e,  resp,         UVM_DEFAULT | UVM_NOCOMPARE)
+    `uvm_field_int    (                     strb,         UVM_DEFAULT | UVM_NOCOMPARE)
+    `uvm_field_enum   (yuu_apb_prot0_e,     prot0,        UVM_DEFAULT | UVM_NOCOMPARE)
+    `uvm_field_enum   (yuu_apb_prot1_e,     prot1,        UVM_DEFAULT | UVM_NOCOMPARE)
+    `uvm_field_enum   (yuu_apb_prot2_e,     prot2,        UVM_DEFAULT | UVM_NOCOMPARE)
+    `uvm_field_object (                     error_object, UVM_DEFAULT | UVM_NOCOMPARE)
   `uvm_object_utils_end
 
   extern function      new(string name = "yuu_apb_item");

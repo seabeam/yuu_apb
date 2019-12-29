@@ -36,4 +36,5 @@ class yuu_apb_master_monitor_callback extends uvm_callback;
   virtual task post_collect(yuu_apb_master_monitor monitor, yuu_apb_master_item item);
   endtask
 endclass
+
 `endif

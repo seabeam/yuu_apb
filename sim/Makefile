@@ -1,5 +1,5 @@
 clean:
-	@rm .[a-z]* -rf
+	@rm .[a-zA-Z0-9]* -rf
 	@ls | grep -v top.sv | grep -v Makefile | xargs rm -rf
 
 comp:
@@ -9,9 +9,10 @@ comp:
 				+incdir+${UVM_HOME} \
 				+incdir+${UVM_HOME}/vcs \
 				+incdir+${UVM_HOME}/verdi \
+				+incdir+../../yuu_common/include \
 				+incdir+../../yuu_common/src/sv \
-				+incdir+../../yuu_amba/src/sv \
 				+incdir+../../yuu_amba/include \
+				+incdir+../../yuu_amba/src/sv \
 				${UVM_HOME}/uvm_pkg.sv \
 				${UVM_HOME}/vcs/uvm_custom_install_vcs_recorder.sv \
 				${UVM_HOME}/verdi/uvm_custom_install_verdi_recorder.sv \

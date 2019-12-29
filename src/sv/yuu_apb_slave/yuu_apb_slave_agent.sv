@@ -8,9 +8,9 @@
 class yuu_apb_slave_agent extends uvm_agent;
   yuu_apb_slave_config cfg;
   
+  yuu_apb_slave_sequencer  sequencer;
   yuu_apb_slave_driver     driver;
   yuu_apb_slave_monitor    monitor;
-  yuu_apb_slave_sequencer  sequencer;
   yuu_apb_slave_collector  collector;
   yuu_apb_slave_analyzer   analyzer;
 
@@ -26,12 +26,16 @@ class yuu_apb_slave_agent extends uvm_agent;
 
   function void build_phase(uvm_phase phase);
     if (!uvm_config_db #(yuu_apb_slave_config)::get(null, get_full_name(), "cfg", cfg))
-      `uvm_fatal("build_phase", "Cannot get yuu_apb_slave agent configuration")
+      `uvm_fatal("build_phase", "Cannot get slave configuration")
+  if (cfg == null)
+    `uvm_fatal("build_phase", "Get a null slave configuration")
+
     monitor = yuu_apb_slave_monitor::type_id::create("monitor", this);
     monitor.cfg = this.cfg;
     if (cfg.is_active == UVM_ACTIVE) begin
+      sequencer = yuu_apb_slave_sequencer::type_id::create("sequencer", this);
       driver = yuu_apb_slave_driver::type_id::create("driver", this);
-      sequencer = new("sequencer", this);
+      sequencer.cfg = this.cfg;
       driver.cfg = this.cfg;
     end
     if (cfg.coverage_enable) begin
@@ -46,7 +50,6 @@ class yuu_apb_slave_agent extends uvm_agent;
 
   function void connect_phase(uvm_phase phase);
     out_monitor_ap = monitor.out_monitor_ap;
-    cfg.sequencer_ptr = this.sequencer;
 
     if (cfg.is_active) begin
       driver.seq_item_port.connect(sequencer.seq_item_export);
