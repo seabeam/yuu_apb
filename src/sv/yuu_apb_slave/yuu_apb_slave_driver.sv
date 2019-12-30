@@ -105,7 +105,7 @@ endtask
 task yuu_apb_slave_driver::drive_bus();
   uvm_event drive_trans_begin = events.get($sformatf("%s_drive_trans_begin", cfg.get_name()));
   uvm_event drive_trans_end   = events.get($sformatf("%s_drive_trans_end", cfg.get_name()));
-  uvm_event handshake = events.get("handshake");
+  uvm_event handshake = events.get($sformatf("%s_handshake", cfg.get_name()));
 
   while(vif.drv_cb.psel !== 1'b1)
     vif.wait_cycle();
@@ -171,7 +171,7 @@ task yuu_apb_slave_driver::drive_bus();
 endtask
 
 task yuu_apb_slave_driver::wait_reset();
-  uvm_event handshake = events.get("handshake");
+  uvm_event handshake = events.get($sformatf("%s_handshake", cfg.get_name()));
 
   forever begin
     @(negedge vif.drv_mp.preset_n);

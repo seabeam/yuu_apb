@@ -82,15 +82,15 @@ task yuu_apb_master_driver::reset_signal();
 endtask
 
 task yuu_apb_master_driver::get_and_drive();
-  uvm_event handshake = events.get("handshake");
+  uvm_event handshake = events.get($sformatf("%s_handshake", cfg.get_name()));
 
   seq_item_port.get_next_item(req);
+  out_driver_ap.write(req);
   handshake.trigger();
   @(vif.drv_cb);
   `uvm_do_callbacks(yuu_apb_master_driver, yuu_apb_master_driver_callback, pre_send(this, req));
   drive_bus();
   `uvm_do_callbacks(yuu_apb_master_driver, yuu_apb_master_driver_callback, post_send(this, req));
-  out_driver_ap.write(req);
   rsp = yuu_apb_master_item::type_id::create("rsp");
   rsp.copy(req);
   rsp.set_id_info(req);
@@ -137,7 +137,7 @@ task yuu_apb_master_driver::drive_bus();
 endtask
 
 task yuu_apb_master_driver::wait_reset();
-  uvm_event handshake = events.get("handshake");
+  uvm_event handshake = events.get($sformatf("%s_handshake", cfg.get_name()));
 
   forever begin
     @(negedge vif.drv_mp.preset_n);

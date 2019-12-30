@@ -47,8 +47,6 @@ task yuu_apb_slave_monitor::run_phase(uvm_phase phase);
   process proc_monitor;
 
   init_component();
-  wait(vif.preset_n === 1'b1);
-  vif.wait_cycle();
   fork
     forever begin 
       wait(vif.mon_mp.preset_n === 1'b1);

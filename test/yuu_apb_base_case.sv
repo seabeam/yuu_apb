@@ -12,21 +12,15 @@ import yuu_common_pkg::*;
 import yuu_apb_pkg::*;
 
 `include "slave_ral_model.sv"
-`uvm_analysis_imp_decl(_master_driver)
 `uvm_analysis_imp_decl(_master_monitor)
-`uvm_analysis_imp_decl(_slave_driver)
 `uvm_analysis_imp_decl(_slave_monitor)
 class yuu_apb_mini_scoreboard extends uvm_scoreboard;
   virtual yuu_apb_master_interface vif;
 
-  uvm_analysis_imp_master_driver  #(yuu_apb_master_item, yuu_apb_mini_scoreboard) mst_drv_export;
   uvm_analysis_imp_master_monitor #(yuu_apb_master_item, yuu_apb_mini_scoreboard) mst_mon_export;
-  uvm_analysis_imp_slave_driver   #(yuu_apb_slave_item, yuu_apb_mini_scoreboard)  slv_drv_export;
   uvm_analysis_imp_slave_monitor  #(yuu_apb_slave_item, yuu_apb_mini_scoreboard)  slv_mon_export;
 
-  yuu_apb_master_item mst_drv_item_q[$];
   yuu_apb_master_item mst_mon_item_q[$];
-  yuu_apb_slave_item  slv_drv_item_q[$];
   yuu_apb_slave_item  slv_mon_item_q[$];
 
   process processes[string];
@@ -37,22 +31,12 @@ class yuu_apb_mini_scoreboard extends uvm_scoreboard;
   endfunction : new
 
   function void build_phase(uvm_phase phase);
-    mst_drv_export = new("mst_drv_export", this);
     mst_mon_export = new("mst_mon_export", this);
-    slv_drv_export = new("slv_drv_export", this);
     slv_mon_export = new("slv_mon_export", this);
-  endfunction
-
-  function write_master_driver(yuu_apb_master_item t);
-    mst_drv_item_q.push_back(t);
   endfunction
 
   function write_master_monitor(yuu_apb_master_item t);
     mst_mon_item_q.push_back(t);
-  endfunction
-
-  function write_slave_driver(yuu_apb_slave_item t);
-    slv_drv_item_q.push_back(t);
   endfunction
 
   function write_slave_monitor(yuu_apb_slave_item t);
@@ -61,8 +45,8 @@ class yuu_apb_mini_scoreboard extends uvm_scoreboard;
 
   task run_phase(uvm_phase phase);
     process proc_compare;
-    yuu_apb_master_item   m0, m1;
-    yuu_apb_slave_item    s0, s1;
+    yuu_apb_master_item   m0;
+    yuu_apb_slave_item    s0;
 
     fork
       forever begin 
@@ -71,16 +55,18 @@ class yuu_apb_mini_scoreboard extends uvm_scoreboard;
           begin
             proc_compare = process::self();
             processes["proc_compare"] = proc_compare;
-            wait(mst_drv_item_q.size() > 0);
             wait(mst_mon_item_q.size() > 0);
-            wait(slv_drv_item_q.size() > 0);
             wait(slv_mon_item_q.size() > 0);
 
-            m0 = mst_drv_item_q.pop_front();
-            m1 = mst_mon_item_q.pop_front();
-            s0 = slv_drv_item_q.pop_front();
-            s1 = slv_mon_item_q.pop_front();
-            $display("[Scoreboard] %0h, %0h, %0h, %0h", m0.data, m1.data, s0.data, s1.data);
+            m0 = mst_mon_item_q.pop_front();
+            s0 = slv_mon_item_q.pop_front();
+            if (m0.addr != s0.addr || m0.data != s0.data || m0.direction != s0.direction)
+              `uvm_error("run_phase", $sformatf("Comapre failed, addr_m: 0x%0h, data_m: 0x%0h, dir_m: %s \
+                                                                 addr_s: 0x%0h, data_s: 0x%0h, dir_s: %s",
+                                                                 m0.addr, m0.data, m0.direction,
+                                                                 s0.addr, s0.data, s0.direction))
+            else
+              `uvm_info("run_phase", $sformatf("Compare passed, addr: 0x%0h, data: 0x%0h, dir: %s", s0.addr, s0.data, s0.direction), UVM_LOW)
           end
         join
       end
@@ -91,8 +77,6 @@ class yuu_apb_mini_scoreboard extends uvm_scoreboard;
 
   task init_component();
     mst_mon_item_q.delete();
-    mst_mon_item_q.delete();
-    slv_drv_item_q.delete();
     slv_mon_item_q.delete();
   endtask
 
@@ -164,16 +148,12 @@ class yuu_apb_base_case extends uvm_test;
     vsequencer = env.vsequencer;
 
     scb.vif = cfg.mst_cfg[0].vif;
-    env.master[0].out_driver_ap.connect(scb.mst_drv_export);
     env.master[0].out_monitor_ap.connect(scb.mst_mon_export);
-    env.slave[0].out_driver_ap.connect(scb.slv_drv_export);
     env.slave[0].out_monitor_ap.connect(scb.slv_mon_export);
   endfunction
   
   task wait_scb_done();
-    wait(scb.mst_drv_item_q.size() == 0);
     wait(scb.mst_mon_item_q.size() == 0);
-    wait(scb.slv_drv_item_q.size() == 0);
     wait(scb.slv_mon_item_q.size() == 0);
   endtask
 endclass

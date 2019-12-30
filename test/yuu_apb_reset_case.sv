@@ -61,8 +61,8 @@ class yuu_apb_reset_virtual_sequence extends yuu_apb_virtual_sequence;
     yuu_apb_response_sequence    rsp_seq = yuu_apb_response_sequence::type_id::create("rsp_seq");
 
     fork
-      mst_seq.start(p_sequencer.master_sequencer[0]);
-      rsp_seq.start(p_sequencer.slave_sequencer[0]);
+      mst_seq.start(p_sequencer.master_sequencer[0], this);
+      rsp_seq.start(p_sequencer.slave_sequencer[0], this);
     join_any
   endtask
 endclass : yuu_apb_reset_virtual_sequence
