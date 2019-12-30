@@ -9,9 +9,36 @@
 `include "yuu_apb_slave_interface.svi"
 
 interface yuu_apb_interface();
-  yuu_apb_master_interface master_if[16]();
-  yuu_apb_slave_interface slave_if[16]();
+  logic preset_n;
+  logic pclk;
 
+  yuu_apb_master_interface master_if[16]();
+  yuu_apb_slave_interface  slave_if[16]();
+
+
+  // Sub-interface connection
+  genvar i;
+
+  generate
+    for (i=0; i<`YUU_APB_MASTER_NUM; i++) begin : master_reset_connection
+      assign master_if[i].preset_n = preset_n;
+    end
+    for (i=0; i<`YUU_APB_SLAVE_NUM; i++) begin : slave_reset_connection
+      assign slave_if[i].preset_n = preset_n;
+    end
+  endgenerate
+
+  generate
+    for (i=0; i<`YUU_APB_MASTER_NUM; i++) begin : master_clock_connection
+      assign master_if[i].pclk = pclk;
+    end
+    for (i=0; i<`YUU_APB_SLAVE_NUM; i++) begin : slave_clock_connection
+      assign slave_if[i].pclk = pclk;
+    end
+  endgenerate
+
+
+  // Methods 
   function void check_master_define(int idx);
     if (idx>=`YUU_APB_MASTER_NUM) begin
       $display("[FATAL] yuu_apb_interface: the master index %0d has not been defined, check the YUU_APB_MASTER_NUM define", idx);

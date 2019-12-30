@@ -13,31 +13,39 @@ class yuu_apb_master_reset_sequence extends yuu_apb_master_sequence_base;
   endfunction : new
 
   task body();
-    yuu_apb_master_item m_item;
-    yuu_apb_data_t  write_data[$];
+    fork
+      begin
+        yuu_apb_master_item m_item;
+        yuu_apb_data_t  write_data[$];
 
-    for (int i=0; i<4; i++) begin
-      m_item = new("m_item");
-      m_item.cfg = cfg;
-      m_item.randomize() with {direction == WRITE;
-                               addr == 32'h1000_0000+i*4;};
-      start_item(m_item);
-      finish_item(m_item);
-      write_data.push_back(m_item.data);
-    end
+        for (int i=0; i<4; i++) begin
+          m_item = new("m_item");
+          m_item.cfg = cfg;
+          m_item.randomize() with {direction == WRITE;
+                                   addr == 32'h1000_0000+i*4;};
+          start_item(m_item);
+          finish_item(m_item);
+          write_data.push_back(m_item.data);
+        end
 
-    for (int i=0; i<4; i++) begin
-      m_item = new("m_item");
-      m_item.cfg = cfg;
-      m_item.randomize() with {direction == READ;
-                               addr == 32'h1000_0000+i*4;};
-      start_item(m_item);
-      finish_item(m_item);
-      if (write_data[i] != m_item.data)
-        `uvm_error("body", $sformatf("Compare failed, write data is %0h, read data is %0h", write_data[i], m_item.data))
-      else
-        `uvm_info("body", $sformatf("Compare pass, read data is %0h", write_data[i]), UVM_LOW)
-    end
+        for (int i=0; i<4; i++) begin
+          m_item = new("m_item");
+          m_item.cfg = cfg;
+          m_item.randomize() with {direction == READ;
+                                   addr == 32'h1000_0000+i*4;};
+          start_item(m_item);
+          finish_item(m_item);
+          if (write_data[i] != m_item.data)
+            `uvm_error("body", $sformatf("Compare failed, write data is %0h, read data is %0h", write_data[i], m_item.data))
+          else
+            `uvm_info("body", $sformatf("Compare pass, read data is %0h", write_data[i]), UVM_LOW)
+        end
+      end
+      begin
+        @(negedge vif.mon_mp.preset_n);
+      end
+    join_any
+    disable fork;
   endtask
 endclass : yuu_apb_master_reset_sequence
 
@@ -82,10 +90,9 @@ class yuu_apb_reset_case extends yuu_apb_base_case;
 
   task assert_reset();
     #502ns;
-    seq.kill();
-    vif.master_if[0].preset_n = 1'b0;
+    vif.preset_n = 1'b0;
     #505ns;
-    vif.master_if[0].preset_n = 1'b1;
+    vif.preset_n = 1'b1;
   endtask
 endclass : yuu_apb_reset_case
 

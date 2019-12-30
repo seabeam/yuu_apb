@@ -105,11 +105,13 @@ endtask
 task yuu_apb_slave_driver::drive_bus();
   uvm_event drive_trans_begin = events.get($sformatf("%s_drive_trans_begin", cfg.get_name()));
   uvm_event drive_trans_end   = events.get($sformatf("%s_drive_trans_end", cfg.get_name()));
+  uvm_event handshake = events.get("handshake");
 
   while(vif.drv_cb.psel !== 1'b1)
     vif.wait_cycle();
 
   seq_item_port.get_next_item(req);
+  handshake.trigger();
   @(vif.drv_cb);
   `uvm_do_callbacks(yuu_apb_slave_driver, yuu_apb_slave_driver_callback, pre_send(this, req));
   drive_trans_begin.trigger();
@@ -163,14 +165,18 @@ task yuu_apb_slave_driver::drive_bus();
     rsp.set_id_info(req);
   end
   seq_item_port.item_done(rsp);
+  handshake.reset();
   drive_trans_end.trigger();
   vif.wait_cycle();
 endtask
 
 task yuu_apb_slave_driver::wait_reset();
+  uvm_event handshake = events.get("handshake");
+
   forever begin
     @(negedge vif.drv_mp.preset_n);
-    if (seq_item_port.has_do_available())
+    `uvm_warning("wait_reset", "Reset signal is asserted, transaction may be dropped")
+    if (handshake.is_on())
       seq_item_port.item_done();
     foreach (processes[i])
       processes[i].kill();

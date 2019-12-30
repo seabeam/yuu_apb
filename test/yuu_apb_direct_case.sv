@@ -49,13 +49,21 @@ class yuu_apb_response_sequence extends yuu_apb_slave_sequence_base;
   endfunction
 
   task body();
-    forever begin
-      req = yuu_apb_slave_item::type_id::create("req");
-      req.cfg = cfg;
-      start_item(req);
-      req.randomize() with {resp == OKAY;};
-      finish_item(req);
-    end
+    vif = cfg.vif;
+
+    fork
+      forever begin
+        req = yuu_apb_slave_item::type_id::create("req");
+        req.cfg = cfg;
+        start_item(req);
+        req.randomize() with {resp == OKAY;};
+        finish_item(req);
+      end
+      begin
+        @(negedge vif.mon_mp.preset_n);
+      end
+    join_any
+    disable fork;
   endtask
 endclass : yuu_apb_response_sequence
 

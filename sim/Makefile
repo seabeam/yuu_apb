@@ -10,5 +10,8 @@ comp:
 			-f bench.f \
 			-l log/compile.log
 
+case:
+	@ls ../test | grep case | cut -d "." -f 1
+
 run:
 	simv +UVM_TESTNAME=${CASE} -l log/sim.log ${ADD}

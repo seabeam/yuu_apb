@@ -104,6 +104,7 @@ endtask
 task yuu_apb_master_monitor::wait_reset();
   forever begin
     @(negedge vif.mon_mp.preset_n);
+    `uvm_warning("wait_reset", "Reset signal is asserted, transaction may be dropped")
     foreach (processes[i])
       processes[i].kill();
     init_component();

@@ -82,7 +82,10 @@ task yuu_apb_master_driver::reset_signal();
 endtask
 
 task yuu_apb_master_driver::get_and_drive();
+  uvm_event handshake = events.get("handshake");
+
   seq_item_port.get_next_item(req);
+  handshake.trigger();
   @(vif.drv_cb);
   `uvm_do_callbacks(yuu_apb_master_driver, yuu_apb_master_driver_callback, pre_send(this, req));
   drive_bus();
@@ -92,6 +95,7 @@ task yuu_apb_master_driver::get_and_drive();
   rsp.copy(req);
   rsp.set_id_info(req);
   seq_item_port.item_done(rsp);
+  handshake.reset();
 endtask
 
 task yuu_apb_master_driver::drive_bus();
@@ -133,9 +137,12 @@ task yuu_apb_master_driver::drive_bus();
 endtask
 
 task yuu_apb_master_driver::wait_reset();
+  uvm_event handshake = events.get("handshake");
+
   forever begin
     @(negedge vif.drv_mp.preset_n);
-    if (seq_item_port.has_do_available())
+    `uvm_warning("wait_reset", "Reset signal is asserted, transaction may be dropped")
+    if (handshake.is_on())
       seq_item_port.item_done();
     foreach (processes[i])
       processes[i].kill();

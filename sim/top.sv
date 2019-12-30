@@ -43,8 +43,6 @@ module top;
 
   always #5 clk = ~clk;
 
-  assign yuu_apb_if.master_if[0].pclk = clk;
-  assign yuu_apb_if.master_if[0].preset_n = rst;
-  assign yuu_apb_if.slave_if[0].pclk = clk;
-  assign yuu_apb_if.slave_if[0].preset_n = rst;
+  assign yuu_apb_if.pclk = clk;
+  assign yuu_apb_if.preset_n = rst;
 endmodule
