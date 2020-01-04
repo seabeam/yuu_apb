@@ -34,7 +34,7 @@ endfunction
 function void yuu_apb_master_item::pre_randomize();
   super.pre_randomize();
 
-  if (!uvm_config_db #(yuu_apb_master_config)::get(m_sequencer, "", "cfg", cfg) && cfg == null)
+  if (!uvm_config_db #(yuu_apb_master_config)::get(null, get_full_name(), "cfg", cfg) && cfg == null)
     `uvm_fatal("pre_randomize", "Cannot get APB master configuration in transaction")
 
   if (!cfg.apb4_enable) begin

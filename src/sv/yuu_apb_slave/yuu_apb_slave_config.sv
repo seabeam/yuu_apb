@@ -23,7 +23,15 @@ class yuu_apb_slave_config extends yuu_apb_agent_config;
     `uvm_field_array_object(                          maps,            UVM_PRINT | UVM_COPY)
   `uvm_object_utils_end
 
-  function new(string name = "yuu_apb_slave_config");
+  extern         function         new(string name = "yuu_apb_slave_config");
+  extern virtual function void    set_map(yuu_amba_addr_t low, yuu_amba_addr_t high);
+  extern virtual function void    set_maps(yuu_amba_addr_t lows[], yuu_amba_addr_t highs[]);
+  extern virtual function         yuu_amba_addr_map get_map();
+  extern virtual function void    get_maps(ref yuu_amba_addr_map maps[]);
+  extern virtual function boolean is_multi_range();
+endclass
+
+  function yuu_apb_slave_config::new(string name = "yuu_apb_slave_config");
     super.new(name);
   endfunction
 
@@ -32,14 +40,14 @@ class yuu_apb_slave_config extends yuu_apb_agent_config;
   // Set slave address range
   // low: low address boundary
   // high: high address boundary
-  function void set_map(yuu_amba_addr_t low, yuu_amba_addr_t high);
+  function void yuu_apb_slave_config::set_map(yuu_amba_addr_t low, yuu_amba_addr_t high);
     maps = new[1];
     maps[0] = yuu_amba_addr_map::type_id::create($sformatf("%s_maps[0]", this.get_name()));
   
     maps[0].set_map(low, high);
   endfunction
 
-  function void set_maps(yuu_amba_addr_t lows[], yuu_amba_addr_t highs[]);
+  function void yuu_apb_slave_config::set_maps(yuu_amba_addr_t lows[], yuu_amba_addr_t highs[]);
     if (lows.size() == 0|| highs.size() == 0)
       `uvm_error("set_maps", "The lows or highs array is empty")
     else if (lows.size() != highs.size())
@@ -54,11 +62,11 @@ class yuu_apb_slave_config extends yuu_apb_agent_config;
     end
   endfunction
 
-  function yuu_amba_addr_map get_map();
+  function yuu_amba_addr_map yuu_apb_slave_config::get_map();
     return this.maps[0];
   endfunction
 
-  function void get_maps(ref yuu_amba_addr_map maps[]);
+  function void yuu_apb_slave_config::get_maps(ref yuu_amba_addr_map maps[]);
     maps = new[this.maps.size()];
     foreach (maps[i]) begin
       maps[i] = yuu_amba_addr_map::type_id::create("map");
@@ -66,9 +74,8 @@ class yuu_apb_slave_config extends yuu_apb_agent_config;
     end
   endfunction
 
-  function boolean is_multi_range();
+  function boolean yuu_apb_slave_config::is_multi_range();
     return this.multi_range;
   endfunction
-endclass
 
 `endif

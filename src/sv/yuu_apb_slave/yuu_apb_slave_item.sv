@@ -31,7 +31,7 @@ endfunction
 function void yuu_apb_slave_item::pre_randomize();
   super.pre_randomize();
 
-  if (!uvm_config_db #(yuu_apb_slave_config)::get(m_sequencer, "", "cfg", cfg) && cfg == null)
+  if (!uvm_config_db #(yuu_apb_slave_config)::get(null, get_full_name(), "cfg", cfg) && cfg == null)
     `uvm_fatal("pre_randomize", "Cannot get APB slave configuration in transaction")
 endfunction
 
