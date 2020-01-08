@@ -61,8 +61,7 @@ class yuu_apb_mini_scoreboard extends uvm_scoreboard;
             m0 = mst_mon_item_q.pop_front();
             s0 = slv_mon_item_q.pop_front();
             if (m0.addr != s0.addr || m0.data != s0.data || m0.direction != s0.direction)
-              `uvm_error("run_phase", $sformatf("Comapre failed, addr_m: 0x%0h, data_m: 0x%0h, dir_m: %s \
-                                                                 addr_s: 0x%0h, data_s: 0x%0h, dir_s: %s",
+              `uvm_error("run_phase", $sformatf("Comapre failed, addr_m: 0x%0h, data_m: 0x%0h, dir_m: %s addr_s: 0x%0h, data_s: 0x%0h, dir_s: %s",
                                                                  m0.addr, m0.data, m0.direction,
                                                                  s0.addr, s0.data, s0.direction))
             else
@@ -110,7 +109,7 @@ class yuu_apb_base_case extends uvm_test;
   function void build_phase(uvm_phase phase);
     cfg = new("cfg");
     cfg.events = new("events");
-    uvm_config_db#(virtual yuu_apb_interface)::get(null, get_full_name(), "vif", vif);
+    uvm_config_db #(virtual yuu_apb_interface)::get(null, get_full_name(), "vif", vif);
   
     cfg.apb_if = vif;
     begin
@@ -130,21 +129,24 @@ class yuu_apb_base_case extends uvm_test;
       cfg.set_config(s_cfg);
     end
 
-    uvm_config_db#(yuu_apb_env_config)::set(this, "env", "cfg", cfg);
+    uvm_config_db #(yuu_apb_env_config)::set(this, "env", "cfg", cfg);
     env = yuu_apb_env::type_id::create("env", this);
 
     scb = yuu_apb_mini_scoreboard::type_id::create("scb", this);
 
-    model = new("model");
-    model.build();
-    model.lock_model();
-    model.reset();
+    if (cfg.mst_cfg[0].use_reg_model) begin
+      model = new("model");
+      model.build();
+      model.lock_model();
+      model.reset();
+    end
   endfunction : build_phase
 
   function void connect_phase(uvm_phase phase);
-    model.default_map.set_sequencer(env.vsequencer.master_sequencer[0], env.master[0].adapter);
-    if (cfg.mst_cfg[0].use_reg_model)
+    if (cfg.mst_cfg[0].use_reg_model) begin
+      model.default_map.set_sequencer(env.vsequencer.master_sequencer[0], env.master[0].adapter);
       env.master[0].predictor.map = model.default_map;
+    end
     vsequencer = env.vsequencer;
 
     scb.vif = cfg.mst_cfg[0].vif;
