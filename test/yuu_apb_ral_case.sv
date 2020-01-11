@@ -22,12 +22,13 @@ class yuu_master_ral_virtual_sequence extends yuu_apb_virtual_sequence;
         uvm_reg_data_t  value;
 
         #100ns;
-        model.common.RA.write(status, 32'h1234);
-        model.common.RB.write(status, 32'h1234);
+        model.control.Clock.write(status, 32'h12);
+        model.common.TIMER.write(status, 32'h5A);
         #100ns;
-        model.common.RA.read(status, value);
-        #100ns;
-        `uvm_info("body", $sformatf("Register A value is %8h", value), UVM_LOW);
+        model.control.Clock.read(status, value);
+        `uvm_info("body", $sformatf("Register Clock value is %8h", value), UVM_LOW);
+        model.common.TIMER.read(status, value);
+        `uvm_info("body", $sformatf("Register Timer value is %8h", value), UVM_LOW);
       end
       rsp_seq.start(p_sequencer.slave_sequencer[0]);
     join_any

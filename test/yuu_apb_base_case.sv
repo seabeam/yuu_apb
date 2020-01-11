@@ -133,17 +133,14 @@ class yuu_apb_base_case extends uvm_test;
     env = yuu_apb_env::type_id::create("env", this);
 
     scb = yuu_apb_mini_scoreboard::type_id::create("scb", this);
-
-    if (cfg.mst_cfg[0].use_reg_model) begin
-      model = new("model");
-      model.build();
-      model.lock_model();
-      model.reset();
-    end
   endfunction : build_phase
 
   function void connect_phase(uvm_phase phase);
     if (cfg.mst_cfg[0].use_reg_model) begin
+      model = slave_ral_model::type_id::create("model");
+      model.build();
+      model.lock_model();
+      model.reset();
       model.default_map.set_sequencer(env.vsequencer.master_sequencer[0], env.master[0].adapter);
       env.master[0].predictor.map = model.default_map;
     end
